@@ -87,7 +87,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           document.getElementById('humidity').textContent = data.humidity.toFixed(1);
           document.getElementById('gas').textContent = data.gas.toFixed(1);
           document.getElementById('dust').textContent = data.dust.toFixed(1);
-          document.getElementById('flame').textContent = data.flame ? 'Yes' : 'No';
+          document.getElementById('flame').textContent = data.flame === 1 ? 'No' : 'Yes';  // 1 means no fire, 0 means fire detected
           
           const statusDiv = document.getElementById('status');
           const statusText = document.getElementById('status-text');
@@ -142,7 +142,7 @@ void initWebServer() {
         doc["gas"] = current_mq2_ppm;
         doc["dust"] = current_mp02_value;
         doc["flame"] = current_flame_value;
-        doc["fireStatus"] = (current_flame_value == 0) ? 1 : 0;  // 1 if flame detected, 0 if not
+        doc["fireStatus"] = (current_flame_value == 0) ? 1 : 0;  // 1 if flame detected (value = 0), 0 if not (value = 1)
 
         String response;
         serializeJson(doc, response);

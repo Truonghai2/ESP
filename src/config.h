@@ -20,13 +20,11 @@ enum PINS {
 };
 
 // WiFi Configuration
-#define WIFI_SSID "Bach Tung 2.4G"
-#define WIFI_PASSWORD "03032010"
-#define SERVER_URL "http://your-server.com/collect_data"
+#define WIFI_SSID "TP-LINK_25AC"
+#define WIFI_PASSWORD "07990717"
+#define SERVER_URL "http://192.168.0.104:8000/api/devices/1/sensor-data"
 
 // Telegram Configuration
-#define TELEGRAM_BOT_TOKEN "7552722310:AAHX5NZgHkHCy3rGfmbe3ljvwFm4LE6SisA"
-#define TELEGRAM_CHAT_ID "-4642251204"
 #define TELEGRAM_NOTIFICATION_INTERVAL 300000  // 5 minutes
 #define TELEGRAM_HEARTBEAT_INTERVAL 3600000    // 1 hour
 
@@ -37,8 +35,8 @@ enum PINS {
 #define DHT_SAMPLE_COUNT 5        // Number of samples for moving average
 
 // Data Collection Settings
-#define MAX_STORED_SAMPLES 100
-#define MIN_COLLECTION_INTERVAL 60000  // 1 minute
+#define MAX_STORED_SAMPLES 10
+#define MIN_COLLECTION_INTERVAL 5000
 
 // Task Stack Sizes
 #define DHT_TASK_STACK_SIZE 2048

@@ -16,21 +16,21 @@ def generate_mock_data(num_samples=1000):
             'humidity_range': (40, 70),
             'gas_range': (0, 300),  
             'dust_range': (10, 80),  
-            'fire_sensor': 0
+            'fire_sensor': 1  # 1 means no fire
         },
         'COOKING_FIRE': {
             'temp_range': (35, 65),
             'humidity_range': (60, 80),
             'gas_range': (150, 500),
             'dust_range': (30, 100),
-            'fire_sensor': 1
+            'fire_sensor': 0  # 0 means fire detected
         },
         'DANGEROUS_FIRE': {
             'temp_range': (65, 200),
             'humidity_range': (20, 60),
             'gas_range': (500, 1000),
             'dust_range': (100, 300),
-            'fire_sensor': 1
+            'fire_sensor': 0  # 0 means fire detected
         }
     }
     
@@ -49,27 +49,27 @@ def generate_mock_data(num_samples=1000):
     # Thêm các trường hợp đặc biệt với trọng số cao
     special_cases = [
         # Phòng điều hòa bình thường
-        {'temperature': 26, 'humidity': 55, 'gas_value': 50, 'dust_value': 15, 'fire_sensor_status': 0, 'label': 'NO_FIRE'},
+        {'temperature': 26, 'humidity': 55, 'gas_value': 50, 'dust_value': 15, 'fire_sensor_status': 1, 'label': 'NO_FIRE'},
         # Phòng bếp khi nấu ăn nhẹ
-        {'temperature': 35, 'humidity': 65, 'gas_value': 150, 'dust_value': 25, 'fire_sensor_status': 1, 'label': 'COOKING_FIRE'},
+        {'temperature': 35, 'humidity': 65, 'gas_value': 150, 'dust_value': 25, 'fire_sensor_status': 0, 'label': 'COOKING_FIRE'},
         # Phòng bếp khi chiên rán
-        {'temperature': 45, 'humidity': 70, 'gas_value': 300, 'dust_value': 40, 'fire_sensor_status': 1, 'label': 'COOKING_FIRE'},
+        {'temperature': 45, 'humidity': 70, 'gas_value': 300, 'dust_value': 40, 'fire_sensor_status': 0, 'label': 'COOKING_FIRE'},
         # Phòng bếp khi nướng
-        {'temperature': 60, 'humidity': 75, 'gas_value': 400, 'dust_value': 50, 'fire_sensor_status': 1, 'label': 'COOKING_FIRE'},
+        {'temperature': 60, 'humidity': 75, 'gas_value': 400, 'dust_value': 50, 'fire_sensor_status': 0, 'label': 'COOKING_FIRE'},
         # Phòng có người hút thuốc
-        {'temperature': 28, 'humidity': 50, 'gas_value': 250, 'dust_value': 80, 'fire_sensor_status': 0, 'label': 'NO_FIRE'},
+        {'temperature': 28, 'humidity': 50, 'gas_value': 250, 'dust_value': 80, 'fire_sensor_status': 1, 'label': 'NO_FIRE'},
         # Phòng có máy lạnh bị rò gas
-        {'temperature': 24, 'humidity': 45, 'gas_value': 500, 'dust_value': 20, 'fire_sensor_status': 0, 'label': 'NO_FIRE'},
+        {'temperature': 24, 'humidity': 45, 'gas_value': 500, 'dust_value': 20, 'fire_sensor_status': 1, 'label': 'NO_FIRE'},
         # Phòng có nhiều người
-        {'temperature': 28, 'humidity': 60, 'gas_value': 350, 'dust_value': 30, 'fire_sensor_status': 0, 'label': 'NO_FIRE'},
+        {'temperature': 28, 'humidity': 60, 'gas_value': 350, 'dust_value': 30, 'fire_sensor_status': 1, 'label': 'NO_FIRE'},
         # Phòng có sơn mới
-        {'temperature': 26, 'humidity': 50, 'gas_value': 450, 'dust_value': 25, 'fire_sensor_status': 0, 'label': 'NO_FIRE'},
+        {'temperature': 26, 'humidity': 50, 'gas_value': 450, 'dust_value': 25, 'fire_sensor_status': 1, 'label': 'NO_FIRE'},
         # Cháy nhỏ do chập điện
-        {'temperature': 85, 'humidity': 40, 'gas_value': 600, 'dust_value': 100, 'fire_sensor_status': 1, 'label': 'DANGEROUS_FIRE'},
+        {'temperature': 85, 'humidity': 40, 'gas_value': 600, 'dust_value': 100, 'fire_sensor_status': 0, 'label': 'DANGEROUS_FIRE'},
         # Cháy rác
-        {'temperature': 120, 'humidity': 30, 'gas_value': 800, 'dust_value': 200, 'fire_sensor_status': 1, 'label': 'DANGEROUS_FIRE'},
+        {'temperature': 120, 'humidity': 30, 'gas_value': 800, 'dust_value': 200, 'fire_sensor_status': 0, 'label': 'DANGEROUS_FIRE'},
         # Cháy lớn do xăng dầu
-        {'temperature': 180, 'humidity': 20, 'gas_value': 1000, 'dust_value': 300, 'fire_sensor_status': 1, 'label': 'DANGEROUS_FIRE'}
+        {'temperature': 180, 'humidity': 20, 'gas_value': 1000, 'dust_value': 300, 'fire_sensor_status': 0, 'label': 'DANGEROUS_FIRE'}
     ]
     
     # Thêm các trường hợp đặc biệt vào dữ liệu
@@ -133,7 +133,7 @@ def analyze_mock_data(data):
         print(f"Bụi: {dust_mean:.1f} µg/m³ ± {dust_std:.1f} µg/m³")
         
         # Phân tích Flame Sensor
-        fire_sensor_count = sum(1 for d in label_data if d['fire_sensor_status'] == 1)
+        fire_sensor_count = sum(1 for d in label_data if d['fire_sensor_status'] == 0)  # 0 means fire detected
         print(f"Flame Sensor báo có lửa: {fire_sensor_count} mẫu ({fire_sensor_count/len(label_data)*100:.1f} %)")
 
 if __name__ == "__main__":

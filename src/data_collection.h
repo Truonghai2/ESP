@@ -17,6 +17,6 @@ struct TrainingSample {
 
 // Function declarations
 void addTrainingSample(float temp, float hum, float gas, float dust, int flame, int predicted_label);
-void sendTrainingData();
+void sendTrainingData(TrainingSample* samples, int count);
 
 #endif // DATA_COLLECTION_H 

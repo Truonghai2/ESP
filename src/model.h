@@ -34,7 +34,7 @@ extern int fireStatus;
 #define GAS_THRESHOLD_COOKING (150.0f)  // Khí gas ngưỡng nấu ăn (từ test case 2)
 #define GAS_THRESHOLD_DANGER (600.0f)   // Khí gas ngưỡng nguy hiểm (từ test case 5)
 #define DUST_THRESHOLD (100.0f)        // Bụi ngưỡng (từ test case 5)
-#define FLAME_THRESHOLD (0)           // Ngưỡng cảm biến lửa (0 = phát hiện lửa)
+#define FLAME_THRESHOLD (0)           // Ngưỡng cảm biến lửa (0 = phát hiện lửa, 1 = không có lửa)
 
 // Fire status codes
 #define FIRE_STATUS_NO_FIRE 0

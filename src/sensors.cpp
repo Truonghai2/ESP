@@ -1,5 +1,6 @@
 #include "sensors.h"
 #include "model.h"
+#include "data_collection.h"
 
 // Global sensor readings
 volatile float current_humidity = 0.0;
@@ -133,8 +134,11 @@ void readMP2() {
 }
 
 void readFlame() {
-    int flame_value = digitalRead(PINS::FIRE_SENSOR);
+    int raw_flame_value = digitalRead(PINS::FIRE_SENSOR);
     unsigned long current_time = millis();
+    
+    // Invert the value: 1 means no fire, 0 means fire detected
+    int flame_value = !raw_flame_value;  // Invert the value
     
     if (flame_value != last_flame_state) {
         if (current_time - last_flame_change > FLAME_DEBOUNCE_TIME) {
@@ -143,7 +147,8 @@ void readFlame() {
             last_flame_change = current_time;
             
             Serial.print("Flame - Value: ");
-            Serial.println(current_flame_value);
+            Serial.print(current_flame_value);
+            Serial.println(current_flame_value == 1 ? " (No Fire)" : " (Fire Detected)");
         }
     }
 }
@@ -187,6 +192,16 @@ void readAllSensors() {
             Serial.println("ERROR");
     }
     Serial.println("=====================\n");
+
+    // Send sensor data and AI prediction to server
+    addTrainingSample(
+        current_temperature,
+        current_humidity,
+        current_mq2_ppm,
+        (float)current_mp02_value,
+        current_flame_value,
+        fire_status
+    );
 }
 
 // Task functions

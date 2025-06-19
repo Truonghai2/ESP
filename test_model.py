@@ -66,71 +66,71 @@ def test_scenarios():
         scenarios = [
             {
                 "name": "Phòng điều hòa bình thường",
-                "values": [26.0, 55.0, 50.0, 15.0, 0.0]
+                "values": [26.0, 55.0, 50.0, 15.0, 1.0]  # 1 means no fire
             },
             {
                 "name": "Phòng bếp khi nấu ăn nhẹ",
-                "values": [35.0, 65.0, 150.0, 25.0, 1.0]
+                "values": [35.0, 65.0, 150.0, 25.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Phòng bếp khi chiên rán",
-                "values": [45.0, 70.0, 300.0, 40.0, 1.0]
+                "values": [45.0, 70.0, 300.0, 40.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Phòng bếp khi nướng",
-                "values": [60.0, 75.0, 400.0, 50.0, 1.0]
+                "values": [60.0, 75.0, 400.0, 50.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Cháy nhỏ do chập điện",
-                "values": [85.0, 40.0, 600.0, 100.0, 1.0]
+                "values": [85.0, 40.0, 600.0, 100.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Cháy rác",
-                "values": [120.0, 30.0, 800.0, 200.0, 1.0]
+                "values": [120.0, 30.0, 800.0, 200.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Cháy lớn do xăng dầu",
-                "values": [180.0, 20.0, 1000.0, 300.0, 1.0]
+                "values": [180.0, 20.0, 1000.0, 300.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Phòng có người hút thuốc",
-                "values": [28.0, 50.0, 250.0, 80.0, 0.0]
+                "values": [28.0, 50.0, 250.0, 80.0, 1.0]  # 1 means no fire
             },
             {
                 "name": "Phòng bị ngập nước",
-                "values": [30.0, 95.0, 100.0, 10.0, 0.0]
+                "values": [30.0, 95.0, 100.0, 10.0, 1.0]  # 1 means no fire
             },
             {
                 "name": "Phòng có máy lạnh bị rò gas",
-                "values": [24.0, 45.0, 500.0, 20.0, 0.0]
+                "values": [24.0, 45.0, 500.0, 20.0, 1.0]  # 1 means no fire
             },
             {
                 "name": "Phòng có nhiều người (CO2 cao)",
-                "values": [28.0, 60.0, 350.0, 30.0, 0.0]
+                "values": [28.0, 60.0, 350.0, 30.0, 1.0]  # 1 means no fire
             },
             {
                 "name": "Phòng có máy photocopy (Ozone, bụi cao)",
-                "values": [27.0, 45.0, 200.0, 60.0, 0.0]
+                "values": [27.0, 45.0, 200.0, 60.0, 1.0]  # 1 means no fire
             },
             {
                 "name": "Phòng có sơn mới (VOCs cao)",
-                "values": [26.0, 50.0, 450.0, 25.0, 0.0]
+                "values": [26.0, 50.0, 450.0, 25.0, 1.0]  # 1 means no fire
             },
             {
                 "name": "Cháy âm ỉ, nhiệt độ thấp",
-                "values": [55.0, 60.0, 500.0, 100.0, 1.0]
+                "values": [55.0, 60.0, 500.0, 100.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Khói nhiều, nhiệt độ trung bình",
-                "values": [70.0, 50.0, 750.0, 200.0, 1.0]
+                "values": [70.0, 50.0, 750.0, 200.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Cháy vật liệu dễ cháy (quần áo)",
-                "values": [90.0, 45.0, 500.0, 250.0, 1.0]
+                "values": [90.0, 45.0, 500.0, 250.0, 0.0]  # 0 means fire detected
             },
             {
                 "name": "Cháy mới khởi phát (nhiệt độ chậm tăng)",
-                "values": [60.0, 50.0, 650.0, 180.0, 1.0]
+                "values": [60.0, 50.0, 650.0, 180.0, 0.0]  # 0 means fire detected
             }
         ]
         

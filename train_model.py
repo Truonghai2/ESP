@@ -23,6 +23,7 @@ def load_data(file_path):
         data = json.load(f)
     
     # Tải dữ liệu và thêm đặc trưng fire_sensor_status
+    # fire_sensor_status: 1 = no fire, 0 = fire detected
     X = np.array([[sample['temperature'], sample['humidity'], 
                    sample['gas_value'], sample['dust_value'], sample['fire_sensor_status']] 
                   for sample in data['data']])

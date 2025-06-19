@@ -13,13 +13,10 @@ unsigned long lastCollectionTime = 0;
 void addTrainingSample(float temp, float hum, float gas, float dust, int flame, int predicted_label) {
     unsigned long currentTime = millis();
     
-    // Check if enough time has passed since last collection
-    if (currentTime - lastCollectionTime < MIN_COLLECTION_INTERVAL) {
-        return;
-    }
+    Serial.println("\n=== Adding Training Sample ===");
     
-    // Add new sample
-    collectedSamples[currentSampleIndex] = {
+    // Prepare a single-sample buffer
+    TrainingSample sample = {
         temp,
         hum,
         gas,
@@ -29,47 +26,52 @@ void addTrainingSample(float temp, float hum, float gas, float dust, int flame, 
         currentTime
     };
     
-    currentSampleIndex = (currentSampleIndex + 1) % MAX_STORED_SAMPLES;
-    if (sampleCount < MAX_STORED_SAMPLES) {
-        sampleCount++;
-    }
-    
-    lastCollectionTime = currentTime;
-    
-    // If we have enough samples, try to send them
-    if (sampleCount >= MAX_STORED_SAMPLES) {
-        sendTrainingData();
-    }
+    // Send this sample immediately
+    sendTrainingData(&sample, 1);
+    Serial.println("===========================\n");
 }
 
-void sendTrainingData() {
+// Overload sendTrainingData to accept a pointer to sample(s) and count
+void sendTrainingData(TrainingSample* samples, int count) {
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("WiFi not connected. Cannot send data.");
         return;
     }
+    
+    Serial.println("\n=== Sending Data to Server ===");
+    Serial.print("Server URL: "); Serial.println(SERVER_URL);
     
     HTTPClient http;
     http.begin(SERVER_URL);
     http.addHeader("Content-Type", "application/json");
     
     // Create JSON document
-    StaticJsonDocument<4096> doc;
-    JsonArray data = doc.createNestedArray("data");
+    StaticJsonDocument<1024> doc;
     
-    // Add all samples to JSON
-    for (int i = 0; i < sampleCount; i++) {
-        JsonObject sample = data.createNestedObject();
-        sample["temperature"] = collectedSamples[i].temperature;
-        sample["humidity"] = collectedSamples[i].humidity;
-        sample["gas_value"] = collectedSamples[i].gas_value;
-        sample["dust_value"] = collectedSamples[i].dust_value;
-        sample["fire_sensor_status"] = collectedSamples[i].fire_sensor_status;
-        sample["label"] = collectedSamples[i].label;
-        sample["timestamp"] = collectedSamples[i].timestamp;
+    // Add device information
+    JsonObject device_info = doc.createNestedObject("device_info");
+    device_info["ip"] = WiFi.localIP().toString();
+    device_info["mac"] = WiFi.macAddress();
+    device_info["rssi"] = WiFi.RSSI();
+    device_info["wifi_ssid"] = WIFI_SSID;
+    
+    // Add sensor data array
+    JsonArray data = doc.createNestedArray("data");
+    for (int i = 0; i < count; i++) {
+        JsonObject s = data.createNestedObject();
+        s["temperature"] = samples[i].temperature;
+        s["humidity"] = samples[i].humidity;
+        s["gas_value"] = samples[i].gas_value;
+        s["dust_value"] = samples[i].dust_value;
+        s["fire_sensor_status"] = samples[i].fire_sensor_status;
+        s["ai_prediction"] = samples[i].label;
+        s["timestamp"] = samples[i].timestamp;
     }
     
     String jsonString;
     serializeJson(doc, jsonString);
+    Serial.println("Sending JSON data:");
+    Serial.println(jsonString);
     
     int httpResponseCode = http.POST(jsonString);
     
@@ -77,13 +79,14 @@ void sendTrainingData() {
         String response = http.getString();
         Serial.println("HTTP Response code: " + String(httpResponseCode));
         Serial.println("Response: " + response);
-        
-        // If data was successfully sent, clear the buffer
-        sampleCount = 0;
-        currentSampleIndex = 0;
+        Serial.println("Data sent successfully");
     } else {
-        Serial.println("Error sending data: " + String(httpResponseCode));
+        Serial.print("Error sending data. HTTP Response code: ");
+        Serial.println(httpResponseCode);
+        Serial.print("Error message: ");
+        Serial.println(http.errorToString(httpResponseCode));
     }
     
     http.end();
+    Serial.println("===========================\n");
 } 
