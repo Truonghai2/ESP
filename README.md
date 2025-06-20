@@ -372,6 +372,6 @@ Hệ thống này sử dụng ESP32 để thu thập dữ liệu từ các cảm
 ---
 
 ## 6. Liên hệ & bản quyền
-- Tác giả: Tùng, Thanh
+- Tác giả: Hải
 - Email cảnh báo: cấu hình trong code
 - Mọi thắc mắc vui lòng liên hệ qua email hoặc github.
