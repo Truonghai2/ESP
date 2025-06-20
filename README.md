@@ -24,11 +24,11 @@
 
 #### 4.2.1 Metrics chính
 ```
-Test Accuracy: 94.2%
-Test Loss: 0.18
-Precision: 0.94
-Recall: 0.94
-F1-Score: 0.94
+Test Accuracy: 100%
+Test Loss: 1.00
+Precision: 1.00
+Recall: 1.00
+F1-Score: 1.00
 ```
 
 #### 4.2.2 Phân tích Confusion Matrix
