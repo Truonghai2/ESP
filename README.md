@@ -239,3 +239,139 @@ Hệ thống phát hiện cháy thông minh sử dụng AI trên ESP32 đã ch�
 - Phát triển ecosystem hoàn chỉnh
 - Tối ưu hóa thêm cho môi trường khắc nghiệt
 - Chuẩn bị cho commercial deployment 
+
+# Fire Detection AI System
+
+## Tổng quan
+Hệ thống này sử dụng ESP32 để thu thập dữ liệu từ các cảm biến môi trường, phân tích bằng AI (TinyML), gửi cảnh báo qua email và đồng thời truyền dữ liệu real-time lên server. Model AI được huấn luyện bằng Python và triển khai lên ESP32.
+
+---
+
+## 1. Luồng hoạt động trên thiết bị (ESP32, thư mục `/src`)
+
+### a. Đọc dữ liệu từ sensor
+- Các cảm biến:
+  - **Nhiệt độ, độ ẩm** (DHT11)
+  - **Khí gas** (MQ2)
+  - **Bụi** (MP2)
+  - **Cảm biến lửa** (Flame sensor, 1 = không có lửa, 0 = có lửa)
+- Hàm `readAllSensors()` đọc tất cả sensor, lưu vào biến toàn cục.
+
+### b. Kiểm tra cảnh báo sensor (không cần AI)
+- Hàm `checkAndSendSensorAlert()` kiểm tra:
+  - Nhiệt độ > 60°C → gửi email: "Cảnh báo: Nhiệt độ trong phòng cao bất thường!"
+  - Phát hiện lửa (`current_flame_value == 0`) → gửi email: "Cảnh báo: Phát hiện lửa trong phòng!"
+  - Gas > 500 ppm → gửi email: "Cảnh báo: Nồng độ khí gas vượt ngưỡng an toàn!"
+  - Bụi > 150 → gửi email: "Cảnh báo: Nồng độ bụi vượt ngưỡng an toàn!"
+- Gửi email qua API POST tới endpoint cấu hình.
+
+### c. AI dự đoán trạng thái cháy
+- Hàm `predictFireStatus()` nhận giá trị sensor, chuẩn hóa, đưa vào model AI (TinyML/TFLite).
+- Kết quả dự đoán:
+  - `NO_FIRE` (0): Không có cháy
+  - `COOKING_FIRE` (1): Lửa nấu ăn
+  - `DANGEROUS_FIRE` (2): Cháy nguy hiểm
+
+### d. Gửi dữ liệu lên server
+- Sau mỗi lần AI dự đoán, hàm `addTrainingSample()` gửi **ngay lập tức** dữ liệu sensor + kết quả AI lên server qua HTTP POST.
+- Dữ liệu gửi đi gồm:
+  - Thông tin thiết bị: IP, MAC, RSSI, SSID
+  - Sensor readings
+  - Kết quả AI
+  - Thời gian
+- Định dạng JSON mẫu:
+```json
+{
+  "device_info": {
+    "ip": "192.168.1.100",
+    "mac": "A4:CF:12:BF:2A:E0",
+    "rssi": -65,
+    "wifi_ssid": "TP-LINK_25AC"
+  },
+  "data": [
+    {
+      "temperature": 28.5,
+      "humidity": 65.0,
+      "gas_value": 120.0,
+      "dust_value": 45.0,
+      "fire_sensor_status": 1,
+      "ai_prediction": 0,
+      "timestamp": 1234567890
+    }
+  ]
+}
+```
+
+### e. Webserver & giao diện
+- ESP32 có thể chạy webserver (`webserver.cpp`) để hiển thị trạng thái sensor, AI, cảnh báo real-time.
+
+---
+
+## 2. Luồng huấn luyện AI (Python, `train_model.py`)
+
+### a. Tải và xử lý dữ liệu
+- Dữ liệu sensor được thu thập (từ file JSON) sẽ được load vào Python.
+- Đặc trưng đầu vào: nhiệt độ, độ ẩm, gas, bụi, trạng thái cảm biến lửa (`fire_sensor_status`).
+
+### b. Tiền xử lý
+- Chuyển đổi nhãn từ chuỗi sang số (`NO_FIRE` = 0, `COOKING_FIRE` = 1, `DANGEROUS_FIRE` = 2).
+- Chia dữ liệu train/test, chuẩn hóa đặc trưng (StandardScaler).
+
+### c. Huấn luyện model
+- Xây dựng model Keras (MLP nhiều lớp, regularization).
+- Sử dụng class weights để cân bằng dữ liệu.
+- Huấn luyện với early stopping, giảm learning rate khi cần.
+
+### d. Đánh giá & trực quan hóa
+- Đánh giá model trên tập test, xuất báo cáo classification, confusion matrix, biểu đồ phân bố đặc trưng, ma trận tương quan.
+
+### e. Chuyển đổi sang TensorFlow Lite
+- Model sau khi huấn luyện được chuyển sang định dạng `.tflite` (quantization int8).
+- Test lại model TFLite ngay trong Python để đảm bảo kết quả tương đương.
+
+### f. Triển khai lên ESP32
+- File `.tflite` được chuyển thành file header C++ (`model_data.h`) để nhúng vào firmware.
+
+---
+
+## 3. Tích hợp gửi email cảnh báo
+- Khi sensor vượt ngưỡng, ESP32 gửi POST request tới API email:
+  - Endpoint: `https://smashing-valid-jawfish.ngrok-free.app/api/user/send-mail`
+  - Body mẫu:
+```json
+{
+  "from": "minhthanh@gmail.com",
+  "to": "tungdev64@gmail.com",
+  "content": "Cảnh báo: Nhiệt độ trong phòng cao bất thường!"
+}
+```
+- Có thể thay đổi nội dung, địa chỉ nhận/gửi trong code.
+
+---
+
+## 4. Sơ đồ luồng tổng thể
+
+1. **ESP32** liên tục đọc sensor → kiểm tra cảnh báo → AI dự đoán → gửi dữ liệu lên server/người dùng.
+2. **Python** dùng dữ liệu thực tế để huấn luyện, đánh giá, chuyển đổi model AI → cập nhật lại cho ESP32.
+
+---
+
+## 5. Hướng dẫn sử dụng nhanh
+
+### a. Build & nạp firmware cho ESP32
+- Sử dụng PlatformIO hoặc Arduino IDE để build/upload code trong thư mục `/src`.
+
+### b. Huấn luyện lại model AI
+- Chạy `python train_model.py` để huấn luyện và xuất model mới.
+- Chạy `python convert_model.py fire_detection_model.tflite src/model_data.h` để chuyển model sang C++ header.
+- Build lại firmware để cập nhật model mới.
+
+### c. Test API server
+- Dùng Postman gửi POST tới endpoint server với body JSON như trên.
+
+---
+
+## 6. Liên hệ & bản quyền
+- Tác giả: Tùng, Thanh
+- Email cảnh báo: cấu hình trong code
+- Mọi thắc mắc vui lòng liên hệ qua email hoặc github.
